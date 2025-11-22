@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const api = axios.create({
-  baseURL: '/api'
+  baseURL: 'https://college-chatbot-management.onrender.com/api'
 });
 
 api.interceptors.request.use((config) => {
