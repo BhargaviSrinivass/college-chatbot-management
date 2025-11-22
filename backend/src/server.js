@@ -19,7 +19,10 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || '*', // Defaults to '*' (allow all) if variable not set
+  credentials: true
+}));
 app.use(express.json());
 
 // Serve static files from the 'uploads' directory located at the project root

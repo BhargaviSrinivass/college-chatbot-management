@@ -151,24 +151,37 @@ router.get(
     }
   }
 );
-
-// PUT /api/department/leave-approval
+// PUT /api/department/leave-approval - FIXED FK ERROR
 router.put(
   '/leave-approval',
   authenticate,
   authorizeRoles('faculty', 'admin', 'department'),
   async (req, res) => {
     const { leave_id, status, remarks } = req.body;
+    
+    // FIX: Only use user ID if they are faculty, otherwise NULL to avoid Foreign Key violation
+    // because 'department' role users are in 'admin' table, not 'faculty' table.
+    const reviewedBy = req.user.role === 'faculty' ? req.user.id : null;
+    
+    // Append audit info to remarks if ID cannot be stored
+    let finalRemarks = remarks || '';
+    if (!reviewedBy) {
+        finalRemarks = finalRemarks 
+            ? `${finalRemarks} (Approved by ${req.user.role})` 
+            : `(Approved by ${req.user.role})`;
+    }
+
     try {
       const result = await pool.query(
         `UPDATE student_leave_requests
          SET status=$1, reviewed_by=$2, review_timestamp=NOW(), remarks=$3
          WHERE leave_id=$4
          RETURNING *`,
-        [status, req.user.id, remarks || null, leave_id]
+        [status, reviewedBy, finalRemarks || null, leave_id]
       );
       return res.json(result.rows[0]);
     } catch (err) {
+      console.error('Leave approval error:', err);
       return res.status(500).json({ message: 'Server error', error: err.message });
     }
   }
