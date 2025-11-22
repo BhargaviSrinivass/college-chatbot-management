@@ -1,8 +1,7 @@
 // src/api/chatApi.js
 import axios from 'axios'; // Assuming you use axios, otherwise use fetch
 
-const API_URL = 'http://localhost:5000/api'; // Change to your actual backend URL
-
+const API_URL = 'https://college-chatbot-management.onrender.com/api';
 export const downloadExcel = async (userQuery, sqlQuery) => {
   try {
     const response = await axios.post(
